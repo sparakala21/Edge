@@ -2,6 +2,8 @@ import numpy as np
 from scipy import ndimage
 import matplotlib.pyplot as plt
 from skimage import io, color
+import os
+import argparse
 
 def gaussian_kernel(size, sigma=1):
     size = int(size) // 2
@@ -109,22 +111,36 @@ def canny_edge_detection(img, lowThresholdRatio=0.05, highThresholdRatio=0.15, s
     img_final = hysteresis(threshold_img, weak, strong)
     return img_final
 
-# Load and preprocess the image
-image = io.imread('images/adrian2.jpg')
-if image.ndim == 3:
-    image = color.rgb2gray(image)
+def main(input_path, output_path):
+    # Load and preprocess the image
+    image = io.imread(input_path)
+    if image.ndim == 3:
+        image = color.rgb2gray(image)
 
-edges = canny_edge_detection(image)
+    edges = canny_edge_detection(image)
 
-plt.figure(figsize=(8, 8))
-plt.subplot(121)
-plt.imshow(image, cmap='gray')
-plt.title('Original Image')
-plt.axis('off')
+    plt.figure(figsize=(8, 8))
+    plt.subplot(121)
+    plt.imshow(image, cmap='gray')
+    plt.title('Original Image')
+    plt.axis('off')
 
-plt.subplot(122)
-plt.imshow(edges, cmap='gray')
-plt.title('Canny Edge Detection')
-plt.axis('off')
+    plt.subplot(122)
+    plt.imshow(edges, cmap='gray')
+    plt.title('Canny Edge Detection')
+    plt.axis('off')
 
-plt.savefig("canny_edge_detection/adrian2.jpg")
+    # Ensure the directory exists
+    output_dir = os.path.dirname(output_path)
+    if not os.path.exists(output_dir):
+        os.makedirs(output_dir)
+
+    plt.savefig(output_path)
+
+if __name__ == "__main__":
+    parser = argparse.ArgumentParser(description='Canny Edge Detection')
+    parser.add_argument('input_path', type=str, help='Path to the input image')
+    parser.add_argument('output_path', type=str, help='Path to save the output image')
+    args = parser.parse_args()
+
+    main(args.input_path, args.output_path)
