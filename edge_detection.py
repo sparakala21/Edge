@@ -2,7 +2,7 @@ import numpy as np
 from PIL import Image
 
 # Read the image and convert to grayscale
-image = Image.open('images/mattdamon.jpg').convert('L')
+image = Image.open('images/church_interior.jpg').convert('L')
 image_array = np.array(image)
 
 gaussian_smoothing = np.array([[2, 4, 5, 4, 2],
@@ -48,16 +48,24 @@ phase = np.arctan2(sobel_h_result, sobel_v_result) * (180.0 / np.pi)
 phase = ((45 * np.round(phase / 45.0)) + 180) % 180
 phase = phase.astype(np.uint8)
 
+# Apply Gaussian smoothing to the phase result
+phase_smoothed = np.zeros_like(phase)
+for i in range(2, image_height-2):
+    for j in range(2, image_width-2):
+        region = phase[i-2:i+3, j-2:j+3]
+        phase_smoothed[i, j] = np.sum(region * gaussian_smoothing)
+
 # Normalize gradient to the range [0, 255]
 gradient = (gradient / gradient.max()) * 255
 gradient = gradient.astype(np.uint8)
 
 # Convert the output array back to images
-phase_image = Image.fromarray(phase)
+phase_smoothed_image = Image.fromarray(phase_smoothed)
 gradient_image = Image.fromarray(gradient)
 
 # Save or display the output images
-phase_image.save('images/phase_damon.jpg')
-gradient_image.save('images/gradient_damon.jpg')
-phase_image.show()
+phase_smoothed_image.save('results/phase_smoothed_church_interior.jpg')
+gradient_image.save('results/gradient_church_interior.jpg')
+
+phase_smoothed_image.show()
 gradient_image.show()
